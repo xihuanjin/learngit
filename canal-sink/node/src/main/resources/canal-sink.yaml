@@ -1,0 +1,136 @@
+    source:
+      name: canalKafkaSource
+      type: canalKafkaSource
+      config: {
+        "bootstrap.servers" : "172.30.9.99:9092,172.30.9.98:9092,172.30.9.102:9092",
+        "topic" : "mysql.crm_dev",
+        "group.id" : "canal-sink-crm-dev-loc1",
+        "batchSize" : 1000,
+        "batchTimeout" : 10000
+      }
+    sink:
+      name: elasticsearchSink
+      type: elasticsearchSink
+      config: {
+        "hostNames" : "172.30.9.152:9200","172.30.9.153:9200","172.30.9.154:9200","172.30.9.155:9200",
+        "batchSize" : 100,
+        "protocol" : "http",
+        "esSinkConfig" : [
+            {
+              "database" : "crm",
+              "table" : "biz",
+              "primaryKeyName" : "ID",
+              "index" : "crm_dev.mixbiz",
+              "customizationKey":"biz",
+              "type" : "doc",
+              "extraProcesss":{
+                      "TAGS":{"mappingfiled":"TAGS_ARRAY","parseSupportType":"stringToArray"},
+                      "exam_types":{"mappingfiled":"exam_type_array","parseSupportType":"stringToArray"}
+              }
+            },
+            {
+              "database" : "crm",
+              "table" : "biz_source",
+              "primaryKeyName" : "BIZ_ID",
+              "index" : "crm_dev.mixbiz",
+              "type" : "doc",
+              "customizationKey":"bizSource",
+              "filedMappings":{
+               "delivery_channel":{
+                 "mappingfiled":"system_tag_array",
+                 "parseSupportType":"esDataIntegrate",
+                 "mappingValue":"1:3|2:3|3:3|4:3|5:3|6:3|7:3|8:3|9:3|11:3|31:3|32:3|33:3|34:3|35:3|36:3"
+               }
+              }                              
+            },
+              {
+              "database" : "crm",
+              "table" : "write_test_pass_match_result",
+              "primaryKeyName" : "BIZ_ID",
+              "index" : "crm_dev.mixbiz",
+              "type" : "doc",
+              "filedMappings":{
+               "TAG":{
+                 "mappingfiled":"system_tag_array",
+                 "parseSupportType":"esDataIntegrate",
+                 "mappingValue":"1:1|2:2",
+                 "mutex":"1:2|2:1",
+                 "nullReplace":"1"
+               }
+              }                              
+            },
+             {
+              "database" : "crm",
+              "table" : "biz_binding_info",
+              "primaryKeyName" : "biz_id",
+              "index" : "crm_dev.mixbiz",
+              "type" : "doc",
+              "deleteChangeUpdate":"true",
+              "filedMappings":{
+               "binding_operator_id":{
+                 "mappingfiled":"binding_operator_id",
+                 "parseSupportType":"deleteToNull"
+               },
+               "binding_time":{
+                 "mappingfiled":"binding_time",
+                 "parseSupportType":"deleteToNull"
+               },
+               "binding_user_id":{
+                 "mappingfiled":"binding_user_id",
+                 "parseSupportType":"deleteToNull"
+               },
+               "binding_node_id":{
+                 "mappingfiled":"binding_node_id",
+                 "parseSupportType":"deleteToNull"
+               },
+               "rate":{
+                 "mappingfiled":"rate",
+                 "parseSupportType":"deleteToNull"
+               },
+               "deadline":{
+                 "mappingfiled":"deadline",
+                 "parseSupportType":"deleteToNull"
+               }
+              }          
+            },
+            {
+              "database" : "crm",
+              "table" : "biz_order",
+              "primaryKeyName" : "BIZ_ID",
+              "index" : "crm_dev.mixbiz",
+              "type" : "doc",
+              "customizationKey":"bizOrder",
+              "parseMultipleResult":"ture",
+              "submitRequest":"true",
+            },
+           {
+              "database" : "crm",
+              "table" : "biz_order_online",
+              "index" : "crm_dev.mixbiz",
+              "type" : "doc",
+              "customizationKey":"bizOnlineOrder",
+              "parseMultipleResult":"ture"
+            },
+            {
+              "database" : "crm",
+              "table" : "user_behavior",
+              "index" : "crm_dev.mixbiz",
+              "type" : "doc",
+              "customizationKey":"userAction",
+              "parseMultipleResult":"ture"
+            },
+            {
+                "database" : "crm",
+                "table" : "biz_robot_relation",
+                "primaryKeyName" : "biz_id",
+                "index" : "crm_dev.mixbiz",
+                "type" : "doc",
+                "deleteChangeUpdate": "true",
+                "customizationKey":"biz_robot_relation"
+             }
+        ]
+      }
+
+    channel:
+      type: memory
+      capacity: 1000000
